@@ -1,0 +1,18 @@
+// Type definitions
+struct PixelInputType
+{
+float4 position : SV_POSITION;
+float4 color : COLOR;
+}; 
+ 
+ 
+// Pixel Shader
+float4 ColorPixelShader(PixelInputType input) : SV_TARGET
+{
+	return input.color;
+}
+
+float4 ColorPixelShaderDark(PixelInputType input) : SV_TARGET
+{
+	return input.color*0.5f;
+}
