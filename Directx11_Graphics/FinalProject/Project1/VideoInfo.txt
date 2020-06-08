@@ -1,0 +1,2 @@
+Video card : NVIDIA GeForce RTX 2060
+Memory :3072
