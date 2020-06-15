@@ -71,6 +71,10 @@ public:
 	void RotateLeft();
 	void RotateRight();
 
+	void DroneFrame(D3DXVECTOR3 prePos, D3DXVECTOR3 pos);
+
+	bool IsDroneMoved();
+
 private:
 	bool InitializeBuffers(ID3D11Device*);
 	void ShutdownBuffers();
@@ -98,8 +102,12 @@ private:
 
 	D3DXVECTOR3 m_pos;
 	D3DXVECTOR3 m_rotate;
+	D3DXVECTOR3 m_prePos;
 	D3DXVECTOR3 m_scale;
 
+	bool moveDir[5];
+	float moveRotX;
+	float moveRotZ;
 	int polygoneCount;
 };
 #endif

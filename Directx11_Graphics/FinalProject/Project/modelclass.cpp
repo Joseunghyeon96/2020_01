@@ -13,8 +13,13 @@ ModelClass::ModelClass()
 	D3DXMatrixIdentity(&m_rotation);
 	D3DXMatrixIdentity(&m_translation);
 
+	for (int i = 0; i < 5; i++)
+	{
+		moveDir[i] = false;
+	}
 	polygoneCount = 0;
 
+	m_prePos = { 0,0,0 };
 	m_pos = { 0,0,0 };
 	m_rotate = { 0,0,0 };
 	m_scale = { 1,1,1 };
@@ -98,7 +103,6 @@ D3DXMATRIX ModelClass::GetWorldMatrix()
 {
 	
 	D3DXVECTOR3 rotate;
-
 	rotate = m_rotate * 0.0174532925f;
 
 
@@ -144,7 +148,13 @@ void ModelClass::GoFoward()
 {
 	D3DXVECTOR3 lookAt, rotate;
 	D3DXMATRIX rotationMatrix;
-
+	if (!moveDir[0]) {
+		moveDir[0] = true;
+		moveDir[4] = true;
+	}
+	moveDir[1] = false;
+	moveDir[2] = false;
+	moveDir[3] = false;
 	lookAt = { 0,0,1 };
 
 	rotate = m_rotate * 0.0174532925f;
@@ -154,7 +164,7 @@ void ModelClass::GoFoward()
 	D3DXVec3TransformCoord(&lookAt, &lookAt, &rotationMatrix);
 	D3DXVec3Normalize(&lookAt, &lookAt);
 
-	m_pos = m_pos + lookAt * 2.0f;
+	m_pos = m_pos + lookAt * 0.5f;
 }
 
 void ModelClass::GoBack()
@@ -162,6 +172,13 @@ void ModelClass::GoBack()
 	D3DXVECTOR3 lookAt, rotate;
 	D3DXMATRIX rotationMatrix;
 
+	if (!moveDir[1]) {
+		moveDir[1] = true;
+		moveDir[4] = true;
+	}
+	moveDir[0] = false;
+	moveDir[2] = false;
+	moveDir[3] = false;
 	lookAt = { 0,0,1 };
 
 	rotate = m_rotate;
@@ -173,7 +190,7 @@ void ModelClass::GoBack()
 	D3DXVec3TransformCoord(&lookAt, &lookAt, &rotationMatrix);
 	D3DXVec3Normalize(&lookAt, &lookAt);
 
-	m_pos = m_pos + lookAt * 2.0f;
+	m_pos = m_pos + lookAt * 0.5f;
 }
 
 void ModelClass::GoLeft()
@@ -181,6 +198,14 @@ void ModelClass::GoLeft()
 	D3DXVECTOR3 lookAt, rotate;
 	D3DXMATRIX rotationMatrix;
 
+	if (!moveDir[2]) {
+		moveDir[2] = true;
+		moveDir[4] = true;
+		moveRotZ = -30.0f;
+	}
+	moveDir[0] = false;
+	moveDir[1] = false;
+	moveDir[3] = false;
 	lookAt = { 0,0,1 };
 
 	rotate = m_rotate;
@@ -192,13 +217,22 @@ void ModelClass::GoLeft()
 	D3DXVec3TransformCoord(&lookAt, &lookAt, &rotationMatrix);
 	D3DXVec3Normalize(&lookAt, &lookAt);
 
-	m_pos = m_pos + lookAt * 2.0f;
+	m_pos = m_pos + lookAt * 0.5f;
 }
 
 void ModelClass::GoRight()
 {
 	D3DXVECTOR3 lookAt, rotate;
 	D3DXMATRIX rotationMatrix;
+
+	if (!moveDir[3]) {
+		moveDir[3] = true;
+		moveDir[4] = true;
+		moveRotZ = 30.0f;
+	}
+	moveDir[0] = false;
+	moveDir[1] = false;
+	moveDir[2] = false;
 
 	lookAt = { 0,0,1 };
 
@@ -211,7 +245,7 @@ void ModelClass::GoRight()
 	D3DXVec3TransformCoord(&lookAt, &lookAt, &rotationMatrix);
 	D3DXVec3Normalize(&lookAt, &lookAt);
 
-	m_pos = m_pos + lookAt * 2.0f;
+	m_pos = m_pos + lookAt * 0.5f;
 }
 
 void ModelClass::GoUp()
@@ -232,6 +266,53 @@ void ModelClass::RotateLeft()
 void ModelClass::RotateRight()
 {
 	m_rotate.y += 2.0f;
+}
+
+void ModelClass::DroneFrame(D3DXVECTOR3 prePos, D3DXVECTOR3 pos)
+{
+	if (prePos == pos)
+	{
+		for (int i = 0; i < 4; i++)
+		{
+			moveDir[i] = false;
+		}
+
+		m_rotate.x = 0;
+		m_rotate.z = 0;
+		return;
+	}
+
+	if (moveDir[2])
+	{
+		m_rotate.z = moveRotZ;
+		if (moveRotZ < 0)
+		{
+			moveRotZ+=0.5f;
+		}
+		else
+			moveDir[4] = false;
+	}
+	if (moveDir[3])
+	{
+		m_rotate.z = moveRotZ;
+		if (moveRotZ > 0)
+		{
+			moveRotZ-=0.5f;
+		}
+		else
+			moveDir[4] = false;
+	}
+
+
+}
+
+bool ModelClass::IsDroneMoved()
+{
+	if (moveDir[4])
+		return true;
+
+	else
+		return false;
 }
 
 bool ModelClass::InitializeBuffers(ID3D11Device* device)

@@ -298,17 +298,22 @@ void GraphicsClass::Shutdown()
 bool GraphicsClass::Frame(int fps, int cpu, float frameTime)
 {
 	bool result;
-	static float rotation = 0.0f;
+	static int i = 0;
 
-	// Update the rotation variable each frame.
-	rotation += (float)D3DX_PI * 0.01f;
-	if (rotation > 360.0f)
-	{
-		rotation -= 360.0f;
+	if (!drone->IsDroneMoved()) {
+	D3DXVECTOR3 droneRotation = drone->GetRotation();
+	if (i == 5)
+		drone->SetRotation(droneRotation.x, droneRotation.y, 2.0f);
+	else if (i == 10)
+		drone->SetRotation(droneRotation.x, droneRotation.y, -2.0f);
+
+	if (i > 10) i = 0;
+
+	i++;
 	}
 
 	// Render the graphics scene.
-	result = Render(rotation);
+	result = Render();
 	if (!result)
 	{
 		return false;
@@ -349,7 +354,7 @@ ModelClass * GraphicsClass::GetDrone()
 	return drone;
 }
 
-bool GraphicsClass::Render(float rotation)
+bool GraphicsClass::Render()
 {
 	D3DXMATRIX viewMatrix, projectionMatrix, worldMatrix, orthoMatrix , skyDomeMatrix;
 	bool result;
