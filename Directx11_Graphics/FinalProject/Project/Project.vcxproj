@@ -32,6 +32,7 @@
     <ClCompile Include="inputclass.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="modelclass.cpp" />
+    <ClCompile Include="multimodelclass.cpp" />
     <ClCompile Include="ShyDomeShaderClass.cpp" />
     <ClCompile Include="SkydomeClass.cpp" />
     <ClCompile Include="SkyPlaneClass.cpp" />
@@ -55,6 +56,7 @@
     <ClInclude Include="graphicsclass.h" />
     <ClInclude Include="inputclass.h" />
     <ClInclude Include="modelclass.h" />
+    <ClInclude Include="multimodelclass.h" />
     <ClInclude Include="ShyDomeShaderClass.h" />
     <ClInclude Include="SkydomeClass.h" />
     <ClInclude Include="SkyPlaneClass.h" />

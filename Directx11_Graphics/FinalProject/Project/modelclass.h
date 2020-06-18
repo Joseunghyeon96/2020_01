@@ -20,13 +20,6 @@ private:
 		D3DXVECTOR3 normal;
 	};
 
-	struct ModelType
-	{
-		float x, y, z;
-		float tu, tv; //ÅØ½ºÃÄ ÁÂÇ¥
-		float nx, ny, nz; //¹ý¼± º¤ÅÍ
-	};
-
 	struct vertexType
 	{
 		float x, y, z;
@@ -40,17 +33,27 @@ private:
 	};
 
 public:
+	struct ModelType
+	{
+		float x, y, z;
+		float tu, tv; //ÅØ½ºÃÄ ÁÂÇ¥
+		float nx, ny, nz; //¹ý¼± º¤ÅÍ
+	};
+
 	ModelClass();
 	ModelClass(const ModelClass&);
 	~ModelClass();
 
-	bool Initialize(ID3D11Device*, char*, WCHAR*);
+	bool Initialize(ID3D11Device*, char*, const WCHAR*);
+	bool Initialize(ID3D11Device*, const WCHAR*);
 	void Shutdown();
 	void Render(ID3D11DeviceContext*);
 
+	void SetModel(ModelType*, int&, int&);
+
 	int GetIndexCount();
 	ID3D11ShaderResourceView* GetTexture();
-
+	
 	D3DXMATRIX GetWorldMatrix();
 
 	D3DXVECTOR3 GetPosition();
@@ -80,7 +83,7 @@ private:
 	void ShutdownBuffers();
 	void RenderBuffers(ID3D11DeviceContext*);
 
-	bool LoadTexture(ID3D11Device*, WCHAR*);
+	bool LoadTexture(ID3D11Device*, const WCHAR*);
 	void ReleaseTexture();
 
 	bool ReadObjFileCount(char*);
@@ -101,8 +104,8 @@ private:
 	D3DXMATRIX m_translation;
 
 	D3DXVECTOR3 m_pos;
-	D3DXVECTOR3 m_rotate;
 	D3DXVECTOR3 m_prePos;
+	D3DXVECTOR3 m_rotate;
 	D3DXVECTOR3 m_scale;
 
 	bool moveDir[5];

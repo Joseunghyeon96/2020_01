@@ -6,6 +6,7 @@ using namespace std;
 
 SkyDomeClass::SkyDomeClass()
 {
+	time = 720;
 }
 
 
@@ -32,32 +33,31 @@ bool SkyDomeClass::Initialize(ID3D11Device* device)
 	{
 		return false;
 	}
-	//// 스카이 돔 꼭대기에 색상을 설정합니다.
-	//m_apexColor = D3DXVECTOR4(0.0f, 0.15f, 0.66f, 1.0f);
+	sunsetApexColor = D3DXVECTOR4(0.780f, 0.153f, 0.153f, 1.0f);
+	sunsetCenterColor = D3DXVECTOR4(0.992f, 0.839f, 0.511f, 1.0f);
+	nightApexColor = D3DXVECTOR4(0.192f, 0.203f, 0.352f, 1.0f);
+	nightCenterColor = D3DXVECTOR4(0.283f, 0.363f, 0.394f, 0.7f);
+	dayApexColor= D3DXVECTOR4(0.53f, 0.81f, 0.92f, 1.0f);
+	dayCenterColor = D3DXVECTOR4(1.0f, 1.0f, 1.0f, 1.0f);
 
-	//// 스카이 돔의 중심에 색상을 설정합니다.
-	//m_centerColor = D3DXVECTOR4(0.81f, 0.38f, 0.66f, 1.0f);
 
-	////==== 낮
-	//// 스카이 돔 꼭대기에 색상을 설정합니다.
-	//m_apexColor = D3DXVECTOR4(0.53f, 0.81f, 0.92f, 1.0f);
+	dayToSunsetApex = (sunsetApexColor - dayApexColor) / 60;
+	dayToSunsetCenter = (sunsetCenterColor - dayCenterColor) / 60;
+	sunsetToDayApex = (dayApexColor - sunsetApexColor) / 60;
+	sunsetToDayCenter = (dayCenterColor - sunsetCenterColor) / 60;
 
-	//// 스카이 돔의 중심에 색상을 설정합니다.
-	//m_centerColor = D3DXVECTOR4(1.0f, 1.0f, 1.0f, 1.0f);
+	nightToSunsetApex = (sunsetApexColor - nightApexColor)/60;
+	nightToSunsetCenter = (sunsetCenterColor - nightCenterColor)/60;
+	sunsetToNightApex = (nightApexColor - sunsetApexColor) / 60;
+	sunsetToNightCenter = (nightCenterColor - sunsetCenterColor) / 60;
 
-	////==== 밤
-	//// 스카이 돔 꼭대기에 색상을 설정합니다.
-	//m_apexColor = D3DXVECTOR4(0.0f, 0.0f, 0.0f, 1.0f);
-
-	//// 스카이 돔의 중심에 색상을 설정합니다.
-	//m_centerColor = D3DXVECTOR4(0.12f, 0.14f, 0.16f, 0.7f);
-
-	//==== 노을
+	time = 720;
+	//==== 낮
 	// 스카이 돔 꼭대기에 색상을 설정합니다.
-	m_apexColor = D3DXVECTOR4(0.502f, 0.502f, 0.502f, 0.0f);
+	m_apexColor = dayApexColor;
 
 	// 스카이 돔의 중심에 색상을 설정합니다.
-	m_centerColor = D3DXVECTOR4(0.992f, 0.369f, 0.325f, 0.977f);
+	m_centerColor = dayCenterColor;
 
 	return true;
 }
@@ -79,6 +79,132 @@ void SkyDomeClass::Render(ID3D11DeviceContext* deviceContext)
 	RenderBuffers(deviceContext);
 }
 
+void SkyDomeClass::Frame()
+{
+	time++;
+
+	if (time > 1440)
+		time = 0;
+
+	SkyChange();
+}
+
+void SkyDomeClass::SkyChange()
+{
+	if (time < 300) // 5시 전까지 밤
+	{
+		m_apexColor = nightApexColor;
+		m_centerColor = nightCenterColor;
+	}
+	else if (time >= 300 && time < 360) // 5~6시까지 밤-> 노을로 바뀜
+	{
+		m_apexColor += nightToSunsetApex;
+		m_centerColor += nightToSunsetCenter;
+	}
+	else if (time >= 360 && time < 420) //6시 ~7시까지 노을
+	{
+		m_apexColor = sunsetApexColor;
+		m_centerColor = sunsetCenterColor;
+	}
+	else if (time >= 420 && time < 480) // 7시 ~ 8시까지 노을 -> 아침으로바뀜
+	{
+		m_apexColor += sunsetToDayApex;
+		m_centerColor += sunsetToDayCenter;
+	}
+	else if (time >= 480 && time < 1020) // 8시 ~ 17시까지 밝은 하늘
+	{
+		m_apexColor = dayApexColor;
+		m_centerColor = dayCenterColor;
+	}
+	else if (time >= 1020 && time < 1080) // 17시 ~ 18시까지 밝은 하늘 -> 노을
+	{
+		m_apexColor += dayToSunsetApex;
+		m_centerColor += dayToSunsetCenter;
+	}
+	else if (time >= 1080 && time < 1140) // 18시 ~ 19시까지 노을 -> 밤
+	{
+		m_apexColor += sunsetToNightApex;
+		m_centerColor += sunsetToNightCenter;
+	}
+	else if (time >= 1140)
+	{
+		m_apexColor = nightApexColor;
+		m_centerColor = nightCenterColor;
+	}
+}
+
+bool SkyDomeClass::IsSpecularLite()
+{
+	//if (time < 300) // 5시 전까지 밤
+	//{
+
+	//}
+	//else if (time >= 300 && time < 360) // 5~6시까지 밤-> 노을로 바뀜
+	//{
+
+	//}
+	//else if (time >= 360 && time < 420) //6시 ~7시까지 노을
+	//{
+
+	//}
+	//else if (time >= 420 && time < 480) // 7시 ~ 8시까지 노을 -> 아침으로바뀜
+	//{
+
+	//}
+	//else if (time >= 480 && time < 1020) // 8시 ~ 17시까지 밝은 하늘
+	//{
+
+	//}
+	//else if (time >= 1020 && time < 1080) // 17시 ~ 18시까지 밝은 하늘 -> 노을
+	//{
+
+	//}
+	//else if (time >= 1080 && time < 1140) // 18시 ~ 19시까지 노을 -> 밤
+	//{
+
+	//}
+	//else if (time >= 1140)
+	//{
+	//}
+	return false;
+}
+
+D3DXVECTOR4 SkyDomeClass::GetLightColor()
+{
+	//if (time < 300) // 5시 전까지 밤
+	//{
+
+	//}
+	//else if (time >= 300 && time < 360) // 5~6시까지 밤-> 노을로 바뀜
+	//{
+
+	//}
+	//else if (time >= 360 && time < 420) //6시 ~7시까지 노을
+	//{
+
+	//}
+	//else if (time >= 420 && time < 480) // 7시 ~ 8시까지 노을 -> 아침으로바뀜
+	//{
+
+	//}
+	//else if (time >= 480 && time < 1020) // 8시 ~ 17시까지 밝은 하늘
+	//{
+
+	//}
+	//else if (time >= 1020 && time < 1080) // 17시 ~ 18시까지 밝은 하늘 -> 노을
+	//{
+
+	//}
+	//else if (time >= 1080 && time < 1140) // 18시 ~ 19시까지 노을 -> 밤
+	//{
+
+	//}
+	//else if (time >= 1140)
+	//{
+	//}
+	return m_apexColor;
+}
+
 
 int SkyDomeClass::GetIndexCount()
 {
@@ -95,6 +221,11 @@ D3DXVECTOR4 SkyDomeClass::GetApexColor()
 D3DXVECTOR4 SkyDomeClass::GetCenterColor()
 {
 	return m_centerColor;
+}
+
+int SkyDomeClass::GetTime()
+{
+	return time;
 }
 
 
@@ -184,7 +315,7 @@ bool SkyDomeClass::InitializeBuffers(ID3D11Device* device)
 	// 정점 배열과 인덱스 배열을 데이터로 로드합니다.
 	for (int i = 0; i < m_vertexCount; i++)
 	{
-		vertices[i].position = D3DXVECTOR3(m_model[i].x, m_model[i].y, m_model[i].z);
+		vertices[i].position = D3DXVECTOR3(m_model[i].x, m_model[i].y-0.3f, m_model[i].z);
 		indices[i] = i;
 	}
 

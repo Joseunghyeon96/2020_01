@@ -16,6 +16,10 @@ public:
 	void SetSpecularColor(float, float, float, float);
 	void SetSpecularPower(float);	
 
+	void SetAmbientColor(D3DXVECTOR4);
+	void SetDiffuseColor(D3DXVECTOR4);
+	void SetSpecularColor(D3DXVECTOR4);
+
 	D3DXVECTOR4 GetAmbientColor();
 	D3DXVECTOR4 GetDiffuseColor();
 	D3DXVECTOR3 GetDirection();

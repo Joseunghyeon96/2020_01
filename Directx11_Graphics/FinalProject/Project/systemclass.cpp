@@ -219,20 +219,21 @@ bool SystemClass::Frame()
 		return false;
 	}
 
+	D3DXVECTOR3 dronePrePos = m_drone->GetPosition();
+
 	// Get the location of the mouse from the input object,
 	m_Camera->SetDroneRotate(m_Input->GetMouseDelta());
-	m_Camera->FollowPos(m_drone->GetPosition());
-
-	D3DXVECTOR3 dronePrePos = m_drone->GetPosition();
-	// Check if the user pressed escape and wants to exit the application.
-	if (m_Input->IsKeyDown(DIK_ESCAPE))
-	{
-		return false;
-	}
+	m_Camera->FollowPos(dronePrePos);
 
 	// Do the frame processing for the graphics object.
 	result = m_Graphics->Frame(m_Fps->GetFps(), m_Cpu->GetCpuPercentage(), m_Timer->GetTime());
 	if (!result)
+	{
+		return false;
+	}
+
+	// Check if the user pressed escape and wants to exit the application.
+	if (m_Input->IsKeyDown(DIK_ESCAPE))
 	{
 		return false;
 	}

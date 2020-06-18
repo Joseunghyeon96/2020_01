@@ -42,6 +42,21 @@ void LightClass::SetSpecularPower(float power)
 	return;
 }
 
+void LightClass::SetAmbientColor(D3DXVECTOR4 input)
+{
+	m_ambientColor = input;
+}
+
+void LightClass::SetDiffuseColor(D3DXVECTOR4 input)
+{
+	m_diffuseColor = input;
+}
+
+void LightClass::SetSpecularColor(D3DXVECTOR4 input)
+{
+	m_specularColor = input;
+}
+
 D3DXVECTOR4 LightClass::GetAmbientColor()
 {
 	return m_ambientColor;

@@ -18,7 +18,8 @@ GraphicsClass::GraphicsClass()
 	m_SkyDome = 0;
 	m_SkyDomeShader = 0;
 	m_SkyPlane = 0;
-	m_SkyPlaneShader =0;
+	m_SkyPlaneShader = 0;
+
 	//모델
 	drone = 0;
 	city = 0;
@@ -61,8 +62,8 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	}
 
 	// Initialize a base view matrix with the camera for 2D user interface rendering.
-	m_Camera->SetPosition(0.0f,0.0f,-15.0f);
-	m_Camera->Render(D3DXVECTOR3(0,0,1));
+	m_Camera->SetPosition(0.0f, 0.0f, -15.0f);
+	m_Camera->Render(D3DXVECTOR3(0, 0, 1));
 	m_Camera->GetViewMatrix(baseViewMatrix);
 
 	// Create the text object.
@@ -78,7 +79,7 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	{
 		MessageBox(hwnd, L"Could not initialize the text object.", L"Error", MB_OK);
 		return false;
-	}	
+	}
 
 	//드론 초기화
 	drone = new ModelClass;
@@ -87,35 +88,33 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 		return false;
 	}
 
-	result = drone->Initialize(m_D3D->GetDevice(), "../Project/data/drone.obj", L"../Project/data/11.dds");
+	result = drone->Initialize(m_D3D->GetDevice(), "../Project/data/drone.obj", L"../Project/data/drone.dds");
 	if (!result)
 	{
 		MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
 		return false;
 	}
-
-	drone->SetRotation(0, 180, 0);
-	drone->SetScaling(0.5, 0.5, 0.5);
+		
+	drone->SetScaling(0.05, 0.05, 0.05);
 	drone->SetPosition(0, 500, 0);
 	allPolygonCount += drone->GetPolygonCount();
 
-
 	//도시 초기화
-	city = new ModelClass;
+	city = new MultiModelClass;
 	if (!city)
 	{
 		return false;
 	}
 
-	result = city->Initialize(m_D3D->GetDevice(), "../Project/data/city0.obj", L"../Project/data/night_sky.dds");
+	result = city->Initialize(m_D3D->GetDevice(), "../Project/data/city.obj", "../Project/data/city texture/", "../Project/data/city.mtl");
 	if (!result)
 	{
-		MessageBox(hwnd, L"Could not initialize the model object.", L"Error", MB_OK);
+		MessageBox(hwnd, L"Could not initialize the city object.", L"Error", MB_OK);
 		return false;
 	}
 
-	city->SetPosition(0,0,0);
-	city->SetScaling(0.1, 0.1, 0.1);
+	//city->SetPosition(0,0,0);
+	city->SetScaling(0.05, 0.05, 0.05);
 
 	allPolygonCount += city->GetPolygonCount();
 
@@ -161,7 +160,7 @@ bool GraphicsClass::Initialize(int screenWidth, int screenHeight, HWND hwnd)
 	{
 		MessageBox(hwnd, L"Could not initialize the texture shader object.", L"Error", MB_OK);
 		return false;
-	}	
+	}
 
 	m_SkyDome = new SkyDomeClass;
 	result = m_SkyDome->Initialize(m_D3D->GetDevice());
@@ -301,19 +300,19 @@ bool GraphicsClass::Frame(int fps, int cpu, float frameTime)
 	static int i = 0;
 
 	if (!drone->IsDroneMoved()) {
-	D3DXVECTOR3 droneRotation = drone->GetRotation();
-	if (i == 5)
-		drone->SetRotation(droneRotation.x, droneRotation.y, 2.0f);
-	else if (i == 10)
-		drone->SetRotation(droneRotation.x, droneRotation.y, -2.0f);
+		D3DXVECTOR3 droneRotation = drone->GetRotation();
+		if (i == 5)
+			drone->SetRotation(droneRotation.x, droneRotation.y, 2.0f);
+		else if (i == 10)
+			drone->SetRotation(droneRotation.x, droneRotation.y, -2.0f);
 
-	if (i > 10) i = 0;
+		if (i > 10) i = 0;
 
-	i++;
+		i++;
 	}
-
 	// Render the graphics scene.
 	result = Render();
+
 	if (!result)
 	{
 		return false;
@@ -334,7 +333,10 @@ bool GraphicsClass::Frame(int fps, int cpu, float frameTime)
 	}
 	// 하늘 평면 프레임 처리를 수행합니다.
 	m_SkyPlane->Frame();
-
+	m_SkyDome->Frame();
+	m_Light->SetAmbientColor(m_SkyDome->GetCenterColor());
+	m_Light->SetDiffuseColor(m_SkyDome->GetCenterColor());
+	m_Light->SetSpecularColor(m_SkyDome->GetCenterColor());
 	result = m_Text->SetPolygonNum(allPolygonCount, m_D3D->GetDeviceContext());
 	if (!result)
 	{
@@ -356,7 +358,7 @@ ModelClass * GraphicsClass::GetDrone()
 
 bool GraphicsClass::Render()
 {
-	D3DXMATRIX viewMatrix, projectionMatrix, worldMatrix, orthoMatrix , skyDomeMatrix;
+	D3DXMATRIX viewMatrix, projectionMatrix, worldMatrix, orthoMatrix, skyDomeMatrix;
 	bool result;
 
 	// Clear the buffers to begin the scene.
@@ -376,7 +378,7 @@ bool GraphicsClass::Render()
 	m_Camera->GetViewMatrix(viewMatrix);
 	m_D3D->GetWorldMatrix(worldMatrix);
 	m_D3D->GetProjectionMatrix(projectionMatrix);
-	m_D3D->GetOrthoMatrix(orthoMatrix);	
+	m_D3D->GetOrthoMatrix(orthoMatrix);
 
 	// Turn off the Z buffer to begin all 2D rendering.
 	m_D3D->TurnZBufferOff();
@@ -386,16 +388,13 @@ bool GraphicsClass::Render()
 	m_SkyDome->Render(m_D3D->GetDeviceContext());
 	m_SkyDomeShader->Render(m_D3D->GetDeviceContext(), m_SkyDome->GetIndexCount(), skyDomeMatrix, viewMatrix, projectionMatrix, m_SkyDome->GetApexColor(), m_SkyDome->GetCenterColor());
 	m_D3D->TurnOnCulling();
-	// Turn the Z buffer back on now that all 2D rendering has completed.
 
 	// 구름이 sky dome color와 혼합되도록 첨가물 블렌딩을 가능하게합니다.
 	m_D3D->EnableSecondBlendState();
 
 	// 하늘 평면 쉐이더를 사용하여 하늘 평면을 렌더링합니다.
-	m_SkyPlane->Render(m_D3D->GetDeviceContext());
-	m_SkyPlaneShader->Render(m_D3D->GetDeviceContext(), m_SkyPlane->GetIndexCount(), skyDomeMatrix, viewMatrix, projectionMatrix,
-							 m_SkyPlane->GetCloudTexture1(), m_SkyPlane->GetCloudTexture2(), m_SkyPlane->GetTranslation(0), m_SkyPlane->GetTranslation(1),
-							 m_SkyPlane->GetTranslation(2), m_SkyPlane->GetTranslation(3), m_SkyPlane->GetBrightness());
+	//m_SkyPlane->Render(m_D3D->GetDeviceContext());
+	//m_SkyPlaneShader->Render(m_D3D->GetDeviceContext(), m_SkyPlane->GetIndexCount(), skyDomeMatrix, viewMatrix, projectionMatrix, m_SkyPlane->GetCloudTexture1(), m_SkyPlane->GetCloudTexture2(), m_SkyPlane->GetTranslation(0), m_SkyPlane->GetTranslation(1), m_SkyPlane->GetTranslation(2), m_SkyPlane->GetTranslation(3), m_SkyPlane->GetBrightness());
 
 	// 블렌드를 끕니다.
 	m_D3D->TurnOffAlphaBlending();
@@ -411,13 +410,9 @@ bool GraphicsClass::Render()
 	}
 
 	//도시
-	city->Render(m_D3D->GetDeviceContext());
+	city->SetLightShaderClass(m_LightShader);
 
-	result = m_LightShader->Render(m_D3D->GetDeviceContext(), city->GetIndexCount(), city->GetWorldMatrix(), viewMatrix, projectionMatrix, city->GetTexture(), m_Light->GetDirection(), m_Light->GetAmbientColor(), m_Light->GetDiffuseColor(), m_Camera->GetPosition(), m_Light->GetSpecularColor(), m_Light->GetSpecularPower(), useLightingEffect);
-	if (!result)
-	{
-		return false;
-	}	
+	city->Render(m_D3D->GetDeviceContext(), viewMatrix, projectionMatrix, m_Light->GetDirection(), m_Light->GetAmbientColor(), m_Light->GetDiffuseColor(), m_Camera->GetPosition(), m_Light->GetSpecularColor(), m_Light->GetSpecularPower(), useLightingEffect);
 
 	// Turn off the Z buffer to begin all 2D rendering.
 	m_D3D->TurnZBufferOff();

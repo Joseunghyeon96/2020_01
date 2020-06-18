@@ -22,7 +22,7 @@ float4 SkyDomePixelShader(PixelInputType input) : SV_TARGET
 		height = 0.0f;
 	}
 
-	float4 outputColor = lerp(centerColor, apexColor, height/1.5f);
+	float4 outputColor = lerp(centerColor, apexColor, height);
 
     return outputColor;
 }

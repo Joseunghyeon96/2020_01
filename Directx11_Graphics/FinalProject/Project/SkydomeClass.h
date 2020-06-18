@@ -27,10 +27,14 @@ public:
 	bool Initialize(ID3D11Device*);
 	void Shutdown();
 	void Render(ID3D11DeviceContext*);
-
+	void Frame();
+	void SkyChange();
+	bool IsSpecularLite();
+	D3DXVECTOR4 GetLightColor();
 	int GetIndexCount();
 	D3DXVECTOR4 GetApexColor();
 	D3DXVECTOR4 GetCenterColor();
+	int GetTime();
 
 private:
 	bool LoadSkyDomeModel(const char*);
@@ -48,5 +52,25 @@ private:
 	ID3D11Buffer* m_indexBuffer = nullptr;
 	D3DXVECTOR4 m_apexColor;
 	D3DXVECTOR4 m_centerColor;
+
+	D3DXVECTOR4 sunsetApexColor;
+	D3DXVECTOR4 sunsetCenterColor;
+	D3DXVECTOR4 nightApexColor;
+	D3DXVECTOR4 nightCenterColor;
+	D3DXVECTOR4 dayApexColor;
+	D3DXVECTOR4 dayCenterColor;
+
+	D3DXVECTOR4 dayToSunsetApex;
+	D3DXVECTOR4 dayToSunsetCenter;
+	D3DXVECTOR4 sunsetToDayApex;
+	D3DXVECTOR4 sunsetToDayCenter;
+
+	D3DXVECTOR4 nightToSunsetApex;
+	D3DXVECTOR4 nightToSunsetCenter;
+	D3DXVECTOR4 sunsetToNightApex;
+	D3DXVECTOR4 sunsetToNightCenter;
+
+
+	int time;
 };
 

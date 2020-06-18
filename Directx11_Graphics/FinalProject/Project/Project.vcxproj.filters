@@ -90,6 +90,9 @@
     <ClCompile Include="SkyPlaneShaderClass.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="multimodelclass.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="graphicsclass.h">
@@ -153,6 +156,9 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="SkyPlaneShaderClass.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="multimodelclass.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

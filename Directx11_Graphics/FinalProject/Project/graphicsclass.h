@@ -11,6 +11,7 @@
 #include "textureshaderclass.h"
 #include "bitmapclass.h"
 #include "textclass.h"
+#include "multimodelclass.h"
 
 #include "SkydomeClass.h"
 #include "ShyDomeShaderClass.h"
@@ -49,8 +50,8 @@ private:
 	TextClass* m_Text;
 
 	ModelClass* drone;
-	ModelClass* city;	
 	ModelClass* bottom;
+	MultiModelClass* city;
 
 	SkyDomeClass* m_SkyDome;
 	SkyDomeShaderClass* m_SkyDomeShader;

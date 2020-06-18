@@ -13,10 +13,6 @@ ModelClass::ModelClass()
 	D3DXMatrixIdentity(&m_rotation);
 	D3DXMatrixIdentity(&m_translation);
 
-	for (int i = 0; i < 5; i++)
-	{
-		moveDir[i] = false;
-	}
 	polygoneCount = 0;
 
 	m_prePos = { 0,0,0 };
@@ -33,7 +29,7 @@ ModelClass::~ModelClass()
 {
 }
 
-bool ModelClass::Initialize(ID3D11Device* device, char* modelFilename, WCHAR* textureFilename)
+bool ModelClass::Initialize(ID3D11Device* device, char* modelFilename, const WCHAR* textureFilename)
 {
 	bool result;
 
@@ -49,6 +45,27 @@ bool ModelClass::Initialize(ID3D11Device* device, char* modelFilename, WCHAR* te
 	{
 		return false;
 	}
+
+	// Load the texture for this model.
+	result = InitializeBuffers(device);
+	if (!result)
+	{
+		return false;
+	}
+
+	// Load the texture for this model.
+	result = LoadTexture(device, textureFilename);
+	if (!result)
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool ModelClass::Initialize(ID3D11Device* device, const WCHAR* textureFilename)
+{
+	bool result;	
 
 	// Load the texture for this model.
 	result = InitializeBuffers(device);
@@ -89,6 +106,13 @@ void ModelClass::Render(ID3D11DeviceContext* deviceContext)
 	return;
 }
 
+void ModelClass::SetModel(ModelType* model, int& vertexCount, int& indexCount)
+{	
+	m_vertexCount = vertexCount;
+	m_indexCount = indexCount;
+	m_model = model;
+}
+
 int ModelClass::GetIndexCount()
 {
 	return m_indexCount;
@@ -103,8 +127,8 @@ D3DXMATRIX ModelClass::GetWorldMatrix()
 {
 	
 	D3DXVECTOR3 rotate;
-	rotate = m_rotate * 0.0174532925f;
 
+	rotate = m_rotate * 0.0174532925f;
 
 	D3DXMatrixScaling(&m_scaling, m_scale.x, m_scale.y, m_scale.z);
 	D3DXMatrixRotationYawPitchRoll(&m_rotation, rotate.y, rotate.x, rotate.z);
@@ -155,6 +179,7 @@ void ModelClass::GoFoward()
 	moveDir[1] = false;
 	moveDir[2] = false;
 	moveDir[3] = false;
+
 	lookAt = { 0,0,1 };
 
 	rotate = m_rotate * 0.0174532925f;
@@ -171,7 +196,6 @@ void ModelClass::GoBack()
 {
 	D3DXVECTOR3 lookAt, rotate;
 	D3DXMATRIX rotationMatrix;
-
 	if (!moveDir[1]) {
 		moveDir[1] = true;
 		moveDir[4] = true;
@@ -179,6 +203,7 @@ void ModelClass::GoBack()
 	moveDir[0] = false;
 	moveDir[2] = false;
 	moveDir[3] = false;
+
 	lookAt = { 0,0,1 };
 
 	rotate = m_rotate;
@@ -197,7 +222,6 @@ void ModelClass::GoLeft()
 {
 	D3DXVECTOR3 lookAt, rotate;
 	D3DXMATRIX rotationMatrix;
-
 	if (!moveDir[2]) {
 		moveDir[2] = true;
 		moveDir[4] = true;
@@ -206,6 +230,7 @@ void ModelClass::GoLeft()
 	moveDir[0] = false;
 	moveDir[1] = false;
 	moveDir[3] = false;
+
 	lookAt = { 0,0,1 };
 
 	rotate = m_rotate;
@@ -287,7 +312,7 @@ void ModelClass::DroneFrame(D3DXVECTOR3 prePos, D3DXVECTOR3 pos)
 		m_rotate.z = moveRotZ;
 		if (moveRotZ < 0)
 		{
-			moveRotZ+=0.5f;
+			moveRotZ += 0.5f;
 		}
 		else
 			moveDir[4] = false;
@@ -297,7 +322,7 @@ void ModelClass::DroneFrame(D3DXVECTOR3 prePos, D3DXVECTOR3 pos)
 		m_rotate.z = moveRotZ;
 		if (moveRotZ > 0)
 		{
-			moveRotZ-=0.5f;
+			moveRotZ -= 0.5f;
 		}
 		else
 			moveDir[4] = false;
@@ -314,6 +339,7 @@ bool ModelClass::IsDroneMoved()
 	else
 		return false;
 }
+
 
 bool ModelClass::InitializeBuffers(ID3D11Device* device)
 {
@@ -436,7 +462,7 @@ void ModelClass::RenderBuffers(ID3D11DeviceContext* deviceContext)
 	return;
 }
 
-bool ModelClass::LoadTexture(ID3D11Device* device, WCHAR* filename)
+bool ModelClass::LoadTexture(ID3D11Device* device, const WCHAR* filename)
 {
 	bool result;
 
