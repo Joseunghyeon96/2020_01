@@ -1,0 +1,100 @@
+#define NUM_LIGHTS 4
+
+Texture2D shaderTexture;
+SamplerState SampleType;
+
+cbuffer LightColorBuffer
+{
+	float4 diffuseColor[NUM_LIGHTS];
+	float4 directDiffColor;
+	float4 directAmbColor;
+	float4 directSpecColor;
+	float specularPower;
+	float3 lightDirection;
+	float range;
+	float3 att;
+};
+
+// Type definitions
+struct PixelInputType
+{
+	float4 position : SV_POSITION;
+	float2 tex : TEXCOORD0;
+	float3 normal : NORMAL;
+	float3 viewDirection : TEXCOORD1;
+	float3 lightPos[NUM_LIGHTS] : TEXCOORDARR;
+}; 
+ 
+ 
+float4 LightPixelShader(PixelInputType input) : SV_TARGET
+{
+ float4 textureColor;
+ float lightIntensity[NUM_LIGHTS];
+ float4 color;
+ float4 colors[NUM_LIGHTS];
+ float4 directColor = directAmbColor;
+ float4 directSpecular = float4(0.0f, 0.0f, 0.0f, 0.0f);
+ float3 lightDir = -lightDirection;
+ float directLightIntensity = saturate(dot(input.normal, lightDir));
+ float3 reflection;
+
+
+ textureColor = shaderTexture.Sample(SampleType, input.tex);
+
+ if(directLightIntensity > 0.0f)
+ {
+	directColor += (directDiffColor * directLightIntensity);
+
+	directColor = saturate(directColor);
+
+	reflection = normalize(2* directLightIntensity * input.normal - lightDir);
+
+	directSpecular = pow(saturate(dot(reflection, input.viewDirection)) , specularPower);
+
+ }
+
+ directColor = saturate((directColor + directSpecular * directSpecColor) *textureColor);
+
+ 
+ float d[NUM_LIGHTS];
+ d[0] = length(input.lightPos[0]);
+ d[1] = length(input.lightPos[1]);
+ d[2] = length(input.lightPos[2]);
+ d[3] = length(input.lightPos[3]);
+
+ float4 pointSpecular[NUM_LIGHTS];
+
+ for(int i = 0; i<NUM_LIGHTS;i++)
+ {
+	pointSpecular[i] = float4(0.0f, 0.0f, 0.0f, 0.0f);
+	if(d[i] > range)
+	{
+	colors[i] = float4(0,0,0,0);
+	}
+	else
+	{
+		lightIntensity[i]= dot(input.lightPos[i]/d[i] , input.normal);
+		if(lightIntensity[i] > 0.0f)
+		{
+			float attenuation = att[0] + att[1]*d[i] + att[2]*d[i]*d[i];
+			colors[i] = lightIntensity[i] * diffuseColor[i];
+			colors[i] /= attenuation;
+			reflection = normalize(2* lightIntensity[i] * input.normal - normalize(input.lightPos[i]));
+			pointSpecular[i] = pow(saturate(dot(reflection, input.viewDirection)),specularPower);
+
+		}
+	}
+ }
+
+ color = saturate((colors[0] +colors[1] +colors[2] +colors[3]));
+ for(int i=0; i<NUM_LIGHTS; i++)
+ {
+	color += pointSpecular[i] * diffuseColor[i];
+ }
+ color = saturate(color * textureColor);
+
+ color = color +directColor;
+
+// color = saturate(color);
+ return color;
+}
